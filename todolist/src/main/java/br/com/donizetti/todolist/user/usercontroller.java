@@ -17,6 +17,12 @@ public class usercontroller {
     
 @PostMapping("/")
     public usermodel create(@RequestBody usermodel usermodel){
+        var user = this.userRepository.findByusername(usermodel.getUsername());
+        if(user != null){
+            System.out.println("Usuario ja existe");
+            return null;
+        }
+
         var userCreated = this.userRepository.save(usermodel);
             return userCreated;
 
