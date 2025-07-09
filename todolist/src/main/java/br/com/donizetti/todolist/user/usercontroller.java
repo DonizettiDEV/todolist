@@ -6,7 +6,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.var;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
@@ -16,15 +19,14 @@ public class usercontroller {
     private UserRepository userRepository;
     
 @PostMapping("/")
-    public usermodel create(@RequestBody usermodel usermodel){
+    public ResponseEntity create(@RequestBody usermodel usermodel){
+        
         var user = this.userRepository.findByusername(usermodel.getUsername());
         if(user != null){
-            System.out.println("Usuario ja existe");
-            return null;
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuario ja existe");
         }
-
         var userCreated = this.userRepository.save(usermodel);
-            return userCreated;
+            return ResponseEntity.status(HttpStatus.CREATED).body(userCreated);
 
     }
 }
