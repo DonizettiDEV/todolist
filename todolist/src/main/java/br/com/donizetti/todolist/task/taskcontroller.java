@@ -7,11 +7,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -20,33 +16,36 @@ import jakarta.servlet.http.HttpServletRequest;
 public class taskcontroller {
 
     @Autowired
-    private taskrepository iTaskrepository;
+    private taskrepository taskRepository;
+
     @PostMapping("/")
-    public ResponseEntity<?> create(@RequestBody taskmodel taskmodel, HttpServletRequest request) {
-        var iduser = (UUID) request.getAttribute("iduser");
-        taskmodel.setUserid(iduser); // Corrige para setar o id do usuário
-
-        var currentDate = LocalDateTime.now();
-        if (currentDate.isAfter(taskmodel.getStartaT())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(taskmodel);
+    public ResponseEntity<?> create(@RequestBody taskmodel taskModel, HttpServletRequest request) {
+        var idUser = (UUID) request.getAttribute("iduser");
+        if (idUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não autenticado");
         }
-        if (currentDate.isAfter(taskmodel.getEndat())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(taskmodel);
+        var task = this.taskRepository.save(taskModel);
+        return ResponseEntity.status(HttpStatus.CREATED).body(task);
+    }
+
+    @GetMapping
+    public ResponseEntity<?> list(HttpServletRequest request) {
+        var idUser = (UUID) request.getAttribute("iduser");
+
+        if (idUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não autenticado");
         }
 
-        var task = this.iTaskrepository.save(taskmodel);
-        return ResponseEntity.status(HttpStatus.OK).body(task);
-
-    }
-    @GetMapping("/")
-    public List<taskmodel> list(HttpServletRequest request){
-        var idUser = request.getAttribute("iduser");
-        var tasks = this.iTaskrepository.findByUserid((UUID) idUser);
-        return tasks;
-    }
-    public void update(@RequestBody taskmodel taskmodel, HttpServletRequest request) {
-    
+        var tasks = this.taskRepository.findByUserid(idUser);
+        return ResponseEntity.ok(tasks);
     }
 
-}
+    @PutMapping("/{id}")
+    public taskmodel update(@RequestBody taskmodel taskModel, HttpServletRequest request, @PathVariable UUID id) {
+        
+
+        taskModel.setId(id);
+        return this.taskRepository.save(taskModel);
+        }
+    }
 
