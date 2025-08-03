@@ -24,7 +24,7 @@ public class usercontroller {
         
         var user = this.userRepository.findByusername(usermodel.getUsername());
         if(user != null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuario ja existe");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST.OK).body("Usuario ja existe");
         }
         var passwordhashred = BCrypt.withDefaults()
         .hashToString(12, usermodel.getPassword().toCharArray());
@@ -32,7 +32,7 @@ public class usercontroller {
         usermodel.setPassword(passwordhashred);
         
         var userCreated = this.userRepository.save(usermodel);
-            return ResponseEntity.status(HttpStatus.CREATED).body(userCreated);
+            return ResponseEntity.status(HttpStatus.OK).body(userCreated);
 
     }
 }
