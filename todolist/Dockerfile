@@ -1,18 +1,30 @@
-FROM ubuntu:latest AS build 
+# Etapa de build
+FROM ubuntu:latest AS build
 
-RUN apt-get update 
-RUN apt-get install openjdk-17-jdk -y
+# Instala dependências necessárias
+RUN apt-get update && \
+    apt-get install -y openjdk-17-jdk maven
 
-COPY . . 
+# Define o diretório de trabalho
+WORKDIR /app
 
-RUN apt-get install maven -y
-RUN mvn clean install
+# Copia os arquivos do projeto para dentro do container
+COPY . .
 
-FROM openjdk17-jdk-slim 
+# Executa o build da aplicação
+RUN mvn clean package -DskipTests
 
+# Etapa de runtime
+FROM openjdk:17-jdk-slim
 
-EXPOSE 8080 
+# Define o diretório de trabalho no container final
+WORKDIR /app
 
-COPY --from=build /target/todolist-0.0.1-SNAPSHOT.jar todolist.jar
+# Expõe a porta 8080
+EXPOSE 8080
 
-ENTRYPOINT [ "Java", "-jar", "todolist.jar" ]
+# Copia o JAR da etapa de build para o container final
+COPY --from=build /app/target/todolist-0.0.1-SNAPSHOT.jar app.jar
+
+# Comando para rodar a aplicação
+ENTRYPOINT ["java", "-jar", "app.jar"]
