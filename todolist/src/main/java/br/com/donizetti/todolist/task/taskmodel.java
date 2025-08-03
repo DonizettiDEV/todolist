@@ -17,19 +17,17 @@ import lombok.Data;
 public class taskmodel {
     
     @Id
-    @GeneratedValue(generator = "UUID")
+    @GeneratedValue
     private UUID id;
+
+    private UUID userid;
+    private String title;
     private String description;
     @Column(length = 50)
-    private String title;
-    private LocalDateTime startaT;
-    private LocalDateTime endat;
-    private String priority;
+    private LocalDateTime startAt;
+    private LocalDateTime endAt;
     
-    private UUID userid;
-
     @CreationTimestamp
     private LocalDateTime createdat;
     
-
 }
